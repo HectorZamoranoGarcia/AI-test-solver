@@ -7,17 +7,6 @@
 ![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Pro-8E75B2?style=for-the-badge&logo=google&logoColor=white)
 
-# AI TEST SOLVER
-
-```text
-    ___    ____   _________________ __  ______ ____  __   _   _______________ 
-   /   |  /  _/  /_  __/ ____/ ___/  |/  / ___/ __ \/ /  | | / / ____/ __ \ 
-  / /| |  / /     / / / __/  \__ \/ /|_/ /\__ \ / / / /   | |/ / __/ / /_/ / 
- / ___ |_/ /     / / / /___ ___/ / /  / /___/ / /_/ / /___| ' / /___/ _, _/  
-/_/  |_/___/    /_/ /_____//____/_/  /_//____/\____/_____/|_/_____/_/ |_|   
-      AI TEST SOLVER — Gemini Chrome Extension by Hector
-```
-
 ## Description
 
 AI Test Solver is a zero-footprint Chrome extension that injects a minimal, camouflaged UI onto any webpage. Upon interaction, it extracts the visible text, strips anti-AI sabotage patterns, and dispatches the sanitized content to Google Gemini via direct API call — returning only the correct answer letters for every multiple-choice question found on the page.
