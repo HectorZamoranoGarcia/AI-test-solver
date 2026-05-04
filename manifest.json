@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "AI Test Solver",
+  "version": "1.0",
+  "description": "Solve multiple-choice tests using Google Gemini AI. Set your own API key in the extension settings.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://*/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
