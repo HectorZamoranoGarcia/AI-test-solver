@@ -65,12 +65,52 @@
       letter-spacing: 0;
     }
 
+    #qs-hide-btn {
+      position: fixed;
+      right: 2px;
+      top: calc(50% + 11px);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2147483647;
+      transition: background 0.15s;
+      user-select: none;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    #qs-restore-btn {
+      position: fixed;
+      right: 2px;
+      bottom: 20px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2147483647;
+      transition: background 0.15s, opacity 0.2s;
+      user-select: none;
+      font-size: 10px;
+      line-height: 1;
+    }
+
     /* Página clara — blanco brillante (como antes) */
     #qs-root.qs-light #qs-btn { background: rgba(140,140,140,0.18); }
     #qs-root.qs-light #qs-btn:hover { background: rgba(140,140,140,0.55); }
     #qs-root.qs-light #qs-tick { color: rgba(255,255,255,0.9); }
     #qs-root.qs-light #qs-spinner { border-color: rgba(255,255,255,0.2); border-top-color: rgba(255,255,255,0.9); }
     #qs-root.qs-light .qs-letter { background: rgba(140,140,140,0.20); color: rgba(255,255,255,0.95); }
+    #qs-root.qs-light #qs-hide-btn { background: rgba(140,140,140,0.18); color: rgba(255,255,255,0.9); }
+    #qs-root.qs-light #qs-hide-btn:hover { background: rgba(140,140,140,0.55); }
+    #qs-root.qs-light #qs-restore-btn { background: transparent; color: rgba(255,255,255,0.12); opacity: 0.25; }
+    #qs-root.qs-light #qs-restore-btn:hover { background: rgba(140,140,140,0.35); color: rgba(255,255,255,0.9); opacity: 1; }
 
     /* Página oscura — texto negro sobre fondo gris tenue */
     #qs-root.qs-dark #qs-btn { background: rgba(120,120,120,0.18); }
@@ -78,6 +118,10 @@
     #qs-root.qs-dark #qs-tick { color: rgba(0,0,0,0.85); }
     #qs-root.qs-dark #qs-spinner { border-color: rgba(0,0,0,0.2); border-top-color: rgba(0,0,0,0.85); }
     #qs-root.qs-dark .qs-letter { background: rgba(120,120,120,0.20); color: rgba(0,0,0,0.9); }
+    #qs-root.qs-dark #qs-hide-btn { background: rgba(120,120,120,0.18); color: rgba(0,0,0,0.85); }
+    #qs-root.qs-dark #qs-hide-btn:hover { background: rgba(120,120,120,0.45); }
+    #qs-root.qs-dark #qs-restore-btn { background: transparent; color: rgba(0,0,0,0.12); opacity: 0.25; }
+    #qs-root.qs-dark #qs-restore-btn:hover { background: rgba(120,120,120,0.35); color: rgba(0,0,0,0.85); opacity: 1; }
   `;
   document.head.appendChild(css);
 
@@ -94,11 +138,21 @@
   spinner.id = 'qs-spinner';
   btn.appendChild(spinner);
 
+  const hideBtn = document.createElement('div');
+  hideBtn.id = 'qs-hide-btn';
+  hideBtn.textContent = '×';
+
+  const restoreBtn = document.createElement('div');
+  restoreBtn.id = 'qs-restore-btn';
+  restoreBtn.textContent = '✓';
+
   const letters = document.createElement('div');
   letters.id = 'qs-letters';
 
   root.appendChild(letters);
   root.appendChild(btn);
+  root.appendChild(hideBtn);
+  root.appendChild(restoreBtn);
   document.body.appendChild(root);
 
   // ── Detección automática de tema (claro/oscuro) ────────────────────────────
@@ -158,6 +212,8 @@
   });
 
   let loading = false;
+  let cachedAnswers = [];
+  let isHidden = false;
 
   function setLoading(on) {
     loading = on;
@@ -174,10 +230,11 @@
       div.textContent = `${i + 1} ${l}`;
       letters.appendChild(div);
     });
-    letters.style.display = 'flex';
+    if (!isHidden) letters.style.display = 'flex';
   }
 
   function showRateLimit() {
+    if (isHidden) return;
     letters.innerHTML = '';
     const div = document.createElement('div');
     div.className = 'qs-letter';
@@ -189,6 +246,7 @@
   }
 
   function showNoKey() {
+    if (isHidden) return;
     letters.innerHTML = '';
     const div = document.createElement('div');
     div.className = 'qs-letter';
@@ -199,6 +257,23 @@
     setTimeout(() => { letters.style.display = 'none'; }, 4000);
   }
 
+  // ── Ocultar / mostrar ─────────────────────────────────────────────────────
+  hideBtn.addEventListener('click', () => {
+    isHidden = true;
+    btn.style.display = 'none';
+    hideBtn.style.display = 'none';
+    letters.style.display = 'none';
+    restoreBtn.style.display = 'flex';
+  });
+
+  restoreBtn.addEventListener('click', () => {
+    isHidden = false;
+    restoreBtn.style.display = 'none';
+    btn.style.display = 'flex';
+    hideBtn.style.display = 'flex';
+    if (cachedAnswers.length && !loading) showLetters(cachedAnswers);
+  });
+
   // ── Click ─────────────────────────────────────────────────────────────────
   btn.addEventListener('click', async () => {
     if (loading) return;
@@ -206,8 +281,9 @@
     const { geminiKey } = await chrome.storage.sync.get('geminiKey');
     if (!geminiKey) { showNoKey(); return; }
 
-    setLoading(true);
+    cachedAnswers = [];
     letters.style.display = 'none';
+    setLoading(true);
 
     try {
       const pageText = getPageText();
@@ -215,7 +291,10 @@
       if (pageText.length > 30) {
         const answers = await askGemini(pageText, geminiKey);
         console.log('[QS] Answers:', answers);
-        if (answers.length) showLetters(answers);
+        if (answers.length) {
+          cachedAnswers = answers;
+          showLetters(answers);
+        }
       }
     } catch (e) {
       console.error('[QS] ERROR:', e);
