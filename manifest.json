@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Test Solver",
   "version": "1.1",
-  "description": "Solve multiple-choice tests and open-ended exercises using Google Gemini AI. Copy generated answers to clipboard. Solve only the selected text or the whole page.",
+  "description": "AI study helper: solve multiple-choice tests and open exercises on any webpage using Google Gemini. One-click copy answers.",
   "permissions": ["storage"],
   "host_permissions": [
     "*://*/*",
